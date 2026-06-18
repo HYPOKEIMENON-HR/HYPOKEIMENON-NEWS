@@ -376,16 +376,36 @@ function incrementUsage() {
 }
 
 function updateUsageUI() {
-  var used = getUsageToday();
-  var remaining = Math.max(0, DAILY_LIMIT - used);
   var el = document.getElementById('usage-counter');
-  if (el) {
+  if (!el) return;
+  if (isDevMode()) {
+    el.textContent = '🛠 개발 모드 (횟수 무제한)';
+    el.style.color = '#8b5cf6';
+    el.style.cursor = 'pointer';
+    el.title = '클릭하면 개발 모드 해제';
+  } else {
+    var used = getUsageToday();
+    var remaining = Math.max(0, DAILY_LIMIT - used);
     el.textContent = '오늘 남은 횟수 ' + remaining + ' / ' + DAILY_LIMIT;
     el.style.color = remaining <= 2 ? '#d93838' : '#737373';
+    el.style.cursor = 'pointer';
+    el.title = '클릭하면 개발 모드 (횟수 무제한)';
   }
 }
 
+function isDevMode() {
+  return localStorage.getItem('dev_mode') === 'true';
+}
+
+function toggleDevMode() {
+  var current = isDevMode();
+  localStorage.setItem('dev_mode', (!current).toString());
+  updateUsageUI();
+  showToast(current ? '개발 모드 OFF — 횟수 제한 활성화' : '개발 모드 ON — 횟수 제한 해제');
+}
+
 function checkLimit() {
+  if (isDevMode()) return true;
   if (getUsageToday() >= DAILY_LIMIT) {
     showToast('오늘 생성 횟수(' + DAILY_LIMIT + '회)를 모두 사용했어요. 내일 다시 시도해주세요.');
     return false;
@@ -619,7 +639,7 @@ function normalizeCards(rawCards, article) {
   var findRole = function(role) { return arr.find(function(c) { return String(c && c.role || '').toUpperCase() === role; }) || null; };
   var hook = arr.find(function(c) { return c && c.type === 'hook'; }) || arr[0] || {};
   var cta = arr.find(function(c) { return c && c.type === 'cta'; }) || arr[4] || {};
-  var roles = ['NOW TRENDING', 'CONTEXT', 'THE TAKEAWAY', "WHAT'S NEXT", 'WHY IT MATTERS'];
+  var roles = ['NOW TRENDING', 'THE TAKEAWAY', "WHAT'S NEXT"];
   var magName = magSettings.magName || '와디즈 매거진';
   return [
     { label: 'HOOK', role: 'HOOK', title: clean(hook.title || ''), body: '', subtitle: clean(hook.subtitle || ''), type: 'hook', magName: magName },
@@ -778,6 +798,8 @@ function init() {
   checkWorkerHealth(false);
   updateUsageUI();
   loadSharedCards();
+  var usageEl = document.getElementById('usage-counter');
+  if (usageEl) usageEl.addEventListener('click', toggleDevMode);
 }
 
 
@@ -852,24 +874,38 @@ function openPreview() {
   document.getElementById('preview-profile-name').textContent = handle;
   document.getElementById('preview-profile-initial').textContent = handle.charAt(0).toUpperCase();
 
-  cards.forEach(function(c, i) {
-    // 카드 복제
-    var original = document.getElementById('card-' + i);
-    if (!original) return;
-    var clone = original.cloneNode(true);
-    clone.style.width = '100%';
-    clone.style.minWidth = '100%';
-    clone.style.height = '380px';
-    clone.style.scrollSnapAlign = 'start';
-    clone.style.flexShrink = '0';
-    clone.removeAttribute('id');
-    swiper.appendChild(clone);
+  // html2canvas로 각 카드를 이미지로 변환해서 스와이퍼에 추가
+  var swiperWidth = 380;
+  swiper.style.width = swiperWidth + 'px';
 
-    // 닷 인디케이터
-    var dot = document.createElement('div');
-    dot.style.cssText = 'width:6px;height:6px;border-radius:50%;background:' + (i===0?'#fff':'rgba(255,255,255,0.5)') + ';transition:.2s;';
-    dots.appendChild(dot);
-  });
+  for (var ci = 0; ci < cards.length; ci++) {
+    (function(i) {
+      var original = document.getElementById('card-' + i);
+      if (!original) return;
+
+      // 이미지 슬라이드 생성
+      var slide = document.createElement('div');
+      slide.style.cssText = 'width:' + swiperWidth + 'px;min-width:' + swiperWidth + 'px;height:' + swiperWidth + 'px;scroll-snap-align:start;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#111;';
+
+      // 로딩 표시
+      slide.innerHTML = '<div style="color:#555;font-size:12px;">로딩 중...</div>';
+      swiper.appendChild(slide);
+
+      // 닷
+      var dot = document.createElement('div');
+      dot.style.cssText = 'width:6px;height:6px;border-radius:50%;background:' + (i===0?'#fff':'rgba(255,255,255,0.5)') + ';transition:.2s;flex-shrink:0;';
+      dots.appendChild(dot);
+
+      // html2canvas로 캡처
+      html2canvas(original, { scale: 1.5, useCORS: true, allowTaint: true, backgroundColor: null }).then(function(canvas) {
+        canvas.style.cssText = 'width:100%;height:100%;object-fit:contain;';
+        slide.innerHTML = '';
+        slide.appendChild(canvas);
+      }).catch(function() {
+        slide.innerHTML = '<div style="color:#555;font-size:11px;">미리보기 실패</div>';
+      });
+    })(ci);
+  }
 
   // 스크롤 시 닷 업데이트
   swiper.addEventListener('scroll', function() {
