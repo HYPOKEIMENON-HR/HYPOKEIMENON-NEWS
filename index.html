@@ -414,7 +414,7 @@ async function workerApiJson(path, options) {
 async function checkWorkerHealth(toast) {
   try {
     var data = await workerApiJson('/health', { timeout: 9000 });
-    $('worker-version').textContent = data.ok ? 'connected ✓' : 'connected';
+    $('worker-version').textContent = data.version || 'connected';
     if (toast) showToast('Worker 연결 확인 완료');
   } catch(e) {
     $('worker-version').textContent = '연결 확인 필요';
@@ -737,21 +737,11 @@ async function openArticleModal(index) {
       // 노이즈 제거 + 단락 구분
       var cleaned = data.body
         .replace(/var\s+\w+\s*=\s*[^;]{0,80};/g, ' ')
-        .replace(/\w+\s*=\s*\d+[,;]/g, ' ')
         .replace(/ⓒ\s*\S+/g, '')
         .replace(/\[사진[^\]]*\]/g, '')
         .replace(/\[이미지[^\]]*\]/g, '')
         .replace(/사진\s*=\s*[^\s]+/g, '')
-        .replace(/\.\s{2,}/g, '.
-
-')
-        .replace(/([다요죠]\.)\s+([가-힣])/g, '$1
-
-$2')
-        .replace(/
-{3,}/g, '
-
-')
+        .replace(/\s{2,}/g, ' ')
         .trim();
       $('modal-body-text').textContent = cleaned;
     } else {
