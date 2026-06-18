@@ -123,7 +123,7 @@ h1 { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
 .modal-head-title { font-size: 17px; font-weight: 900; letter-spacing: -.02em; line-height: 1.4; word-break: keep-all; }
 .modal-head-meta { font-size: 12px; color: var(--muted); margin-top: 6px; }
 .modal-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
-.modal-body-text { font-size: 14px; line-height: 1.85; color: #333; word-break: keep-all; white-space: pre-wrap; }
+.modal-body-text { font-size: 14px; line-height: 1.9; color: #222; word-break: keep-all; white-space: pre-wrap; letter-spacing: -.01em; }
 .modal-body-empty { color: var(--muted); font-size: 13px; text-align: center; padding: 32px 0; }
 .modal-foot { padding: 16px 24px; border-top: 1px solid var(--rule); display: flex; gap: 10px; justify-content: flex-end; }
 
@@ -246,9 +246,14 @@ h1 { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
 <div id="article-modal" class="modal-overlay" onclick="closeArticleModal(event)">
   <div class="modal-box">
     <div class="modal-head">
-      <div class="modal-head-label">기사 본문 미리보기</div>
-      <div id="modal-title" class="modal-head-title"></div>
-      <div id="modal-meta" class="modal-head-meta"></div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+        <div style="flex:1;min-width:0;">
+          <div class="modal-head-label">기사 본문 미리보기</div>
+          <div id="modal-title" class="modal-head-title"></div>
+          <div id="modal-meta" class="modal-head-meta"></div>
+        </div>
+        <a id="modal-origin-link" href="#" target="_blank" class="btn ghost" style="white-space:nowrap;flex-shrink:0;font-size:12px;padding:8px 12px;">원문 보기 ↗</a>
+      </div>
     </div>
     <div class="modal-body">
       <div id="modal-body-text" class="modal-body-text"></div>
@@ -467,7 +472,7 @@ function renderArticles() {
       + '<div class="article-sub">' + escapeHtml(date) + ' · ' + escapeHtml(a.domain || '') + '</div>'
       + '<div class="article-desc">' + escapeHtml(a.desc || '기사 설명 없음') + '</div>'
       + '</div>'
-      + '<button type="button" class="btn">AI 생성</button>';
+      + '<button type="button" class="btn">본문 보기</button>';
     div.addEventListener('click', function() { openArticleModal(i); });
     div.querySelector('button').addEventListener('click', function(e) { e.stopPropagation(); openArticleModal(i); });
     list.appendChild(div);
@@ -712,6 +717,11 @@ async function openArticleModal(index) {
   $('modal-title').textContent = article.title;
   $('modal-meta').textContent = (article.pubDate ? new Date(article.pubDate).toLocaleDateString('ko-KR') + ' · ' : '') + (article.domain || '');
   $('modal-body-text').innerHTML = '<div class="modal-body-empty">본문 불러오는 중...</div>';
+  // 원문 링크 설정
+  var originLink = $('modal-origin-link');
+  if (originLink) {
+    originLink.href = article.origin || article.url || '#';
+  }
   modal.classList.add('show');
   document.body.style.overflow = 'hidden';
 
@@ -724,8 +734,26 @@ async function openArticleModal(index) {
     }, 20000);
     var data = await res.json();
     if (data.ok && data.body) {
-     var cleaned = data.body.replace(/\.\s*/g, '.\n').replace(/\n{3,}/g, '\n\n');
-$('modal-body-text').textContent = cleaned;
+      // 노이즈 제거 + 단락 구분
+      var cleaned = data.body
+        .replace(/var\s+\w+\s*=\s*[^;]{0,80};/g, ' ')
+        .replace(/\w+\s*=\s*\d+[,;]/g, ' ')
+        .replace(/ⓒ\s*\S+/g, '')
+        .replace(/\[사진[^\]]*\]/g, '')
+        .replace(/\[이미지[^\]]*\]/g, '')
+        .replace(/사진\s*=\s*[^\s]+/g, '')
+        .replace(/\.\s{2,}/g, '.
+
+')
+        .replace(/([다요죠]\.)\s+([가-힣])/g, '$1
+
+$2')
+        .replace(/
+{3,}/g, '
+
+')
+        .trim();
+      $('modal-body-text').textContent = cleaned;
     } else {
       $('modal-body-text').innerHTML = '<div class="modal-body-empty">본문을 불러오지 못했어요.<br>기사 원문을 직접 확인해주세요.</div>';
     }
