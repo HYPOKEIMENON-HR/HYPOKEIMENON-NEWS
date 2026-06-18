@@ -922,17 +922,11 @@ function openPreview() {
     });
   });
 
-  // 캡션/해시태그
-  document.getElementById('preview-caption').textContent = lastSummary.caption || '';
-  document.getElementById('preview-hashtags').textContent = Array.isArray(lastSummary.hashtags) ? lastSummary.hashtags.join(' ') : '';
-
-  document.getElementById('preview-modal').classList.add('show');
-  document.body.style.overflow = 'hidden';
+  // 캡션/해시태그 (구버전 잔재 - 제거됨)
 }
 
-function closePreviewModal(e) {
-  if (e && e.target !== document.getElementById('preview-modal')) return;
-  document.getElementById('preview-modal').classList.remove('show');
+function closePreviewModal() {
+  document.getElementById('preview-modal').style.display = 'none';
   document.body.style.overflow = '';
 }
 
