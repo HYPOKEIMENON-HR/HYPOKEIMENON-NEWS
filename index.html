@@ -875,8 +875,13 @@ function openPreview() {
   document.getElementById('preview-profile-initial').textContent = handle.charAt(0).toUpperCase();
 
   // html2canvas로 각 카드를 이미지로 변환해서 스와이퍼에 추가
-  var swiperWidth = 380;
+  var swiperWidth = Math.min(380, window.innerWidth - 48);
   swiper.style.width = swiperWidth + 'px';
+  swiper.style.overflowX = 'auto';
+  swiper.style.overflowY = 'hidden';
+  swiper.style.scrollSnapType = 'x mandatory';
+  swiper.style.webkitOverflowScrolling = 'touch';
+  swiper.style.scrollBehavior = 'smooth';
 
   for (var ci = 0; ci < cards.length; ci++) {
     (function(i) {
@@ -885,7 +890,7 @@ function openPreview() {
 
       // 이미지 슬라이드 생성
       var slide = document.createElement('div');
-      slide.style.cssText = 'width:' + swiperWidth + 'px;min-width:' + swiperWidth + 'px;height:' + swiperWidth + 'px;scroll-snap-align:start;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#111;';
+      slide.style.cssText = 'width:' + swiperWidth + 'px;min-width:' + swiperWidth + 'px;height:' + swiperWidth + 'px;scroll-snap-align:start;scroll-snap-stop:always;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#111;';
 
       // 로딩 표시
       slide.innerHTML = '<div style="color:#555;font-size:12px;">로딩 중...</div>';
