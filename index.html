@@ -113,6 +113,20 @@ h1 { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
 .btn.ghost { background: #fff; color: var(--ink); border: 1px solid var(--rule); }
 .btn.ghost:hover { border-color: var(--ink); opacity: 1; }
 
+
+/* 기사 미리보기 모달 */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 9000; display: none; align-items: center; justify-content: center; padding: 24px; }
+.modal-overlay.show { display: flex; }
+.modal-box { background: #fff; border-radius: 14px; width: 100%; max-width: 680px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 24px 64px rgba(0,0,0,.22); }
+.modal-head { padding: 22px 24px 16px; border-bottom: 1px solid var(--rule); }
+.modal-head-label { font-size: 11px; font-weight: 700; letter-spacing: .14em; color: var(--muted); margin-bottom: 6px; }
+.modal-head-title { font-size: 17px; font-weight: 900; letter-spacing: -.02em; line-height: 1.4; word-break: keep-all; }
+.modal-head-meta { font-size: 12px; color: var(--muted); margin-top: 6px; }
+.modal-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+.modal-body-text { font-size: 14px; line-height: 1.85; color: #333; word-break: keep-all; white-space: pre-wrap; }
+.modal-body-empty { color: var(--muted); font-size: 13px; text-align: center; padding: 32px 0; }
+.modal-foot { padding: 16px 24px; border-top: 1px solid var(--rule); display: flex; gap: 10px; justify-content: flex-end; }
+
 /* 로딩/토스트 */
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #111; color: #fff; border-radius: 10px; padding: 10px 18px; font-size: 13px; z-index: 9999; opacity: 0; transition: .2s; pointer-events: none; }
 .toast.show { opacity: 1; }
@@ -227,6 +241,25 @@ h1 { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
   </div>
 </main>
 
+
+<!-- 기사 미리보기 모달 -->
+<div id="article-modal" class="modal-overlay" onclick="closeArticleModal(event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-head-label">기사 본문 미리보기</div>
+      <div id="modal-title" class="modal-head-title"></div>
+      <div id="modal-meta" class="modal-head-meta"></div>
+    </div>
+    <div class="modal-body">
+      <div id="modal-body-text" class="modal-body-text"></div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn ghost" onclick="closeArticleModal()">닫기</button>
+      <button type="button" class="btn" id="modal-generate-btn" onclick="generateFromModal()">이 기사로 카드뉴스 만들기 →</button>
+    </div>
+  </div>
+</div>
+
 <div id="loading" class="loading"><div class="spinner"></div><div id="loading-text">처리 중...</div></div>
 <div id="toast" class="toast"></div>
 
@@ -284,6 +317,7 @@ function checkLimit() {
 var lastQuery = '';
 var lastSummary = { caption: '', hashtags: [] };
 var magSettings = {};
+var modalArticleIndex = -1;
 
 function $(id) { return document.getElementById(id); }
 
@@ -434,8 +468,8 @@ function renderArticles() {
       + '<div class="article-desc">' + escapeHtml(a.desc || '기사 설명 없음') + '</div>'
       + '</div>'
       + '<button type="button" class="btn">AI 생성</button>';
-    div.addEventListener('click', function() { generateFromArticle(i); });
-    div.querySelector('button').addEventListener('click', function(e) { e.stopPropagation(); generateFromArticle(i); });
+    div.addEventListener('click', function() { openArticleModal(i); });
+    div.querySelector('button').addEventListener('click', function(e) { e.stopPropagation(); openArticleModal(i); });
     list.appendChild(div);
   });
 }
@@ -665,6 +699,50 @@ function init() {
   renderSearchChips();
   checkWorkerHealth(false);
   updateUsageUI();
+}
+
+
+async function openArticleModal(index) {
+  var article = currentArticles[index];
+  if (!article) return;
+  modalArticleIndex = index;
+
+  // 모달 열기
+  var modal = $('article-modal');
+  $('modal-title').textContent = article.title;
+  $('modal-meta').textContent = (article.pubDate ? new Date(article.pubDate).toLocaleDateString('ko-KR') + ' · ' : '') + (article.domain || '');
+  $('modal-body-text').innerHTML = '<div class="modal-body-empty">본문 불러오는 중...</div>';
+  modal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+
+  // 본문 fetch
+  try {
+    var res = await fetchWithTimeout(WORKER_API_BASE + '/fetch-article', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ url: article.url, origin: article.origin, title: article.title, desc: article.desc })
+    }, 20000);
+    var data = await res.json();
+    if (data.ok && data.body) {
+      $('modal-body-text').textContent = data.body;
+    } else {
+      $('modal-body-text').innerHTML = '<div class="modal-body-empty">본문을 불러오지 못했어요.<br>기사 원문을 직접 확인해주세요.</div>';
+    }
+  } catch(e) {
+    $('modal-body-text').innerHTML = '<div class="modal-body-empty">본문 로딩 실패: ' + e.message + '</div>';
+  }
+}
+
+function closeArticleModal(e) {
+  if (e && e.target !== $('article-modal')) return;
+  $('article-modal').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function generateFromModal() {
+  $('article-modal').classList.remove('show');
+  document.body.style.overflow = '';
+  generateFromArticle(modalArticleIndex);
 }
 
 window.addEventListener('DOMContentLoaded', init);
