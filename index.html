@@ -227,6 +227,8 @@ h1 { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
           <div class="hint"><b>카드 저장하기</b> — 옆으로 스크롤해서 5컷을 확인하세요.</div>
           <div class="hint">각 카드 하단에서 정렬·이미지를 바꾸고, 아래 편집 패널에서 문장을 다듬을 수 있어요.</div>
         </div>
+        <button type="button" class="btn ghost" onclick="openPreview()">📱 인스타 미리보기</button>
+        <button type="button" class="btn ghost" onclick="shareCards()">🔗 팀 공유</button>
         <button type="button" class="btn" onclick="downloadAll()">⬇ 전체 ZIP 다운로드</button>
       </div>
       <div class="card-scroll"><div id="card-row" class="card-row"></div></div>
@@ -265,12 +267,83 @@ h1 { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
   </div>
 </div>
 
+
+<!-- 인스타 미리보기 모달 -->
+<div id="preview-modal" class="modal-overlay" onclick="closePreviewModal(event)">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-head">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="modal-head-label">📱 인스타그램 미리보기</div>
+        <button type="button" class="btn ghost" style="padding:6px 10px;font-size:12px" onclick="closePreviewModal()">닫기</button>
+      </div>
+    </div>
+    <div class="modal-body" style="padding:0;background:#fafafa;">
+      <!-- 인스타 프로필 헤더 -->
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border-bottom:1px solid #efefef;">
+        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;" id="preview-profile-initial">H</div>
+        <div>
+          <div style="font-size:13px;font-weight:800;" id="preview-profile-name">hypokeimenon</div>
+          <div style="font-size:11px;color:#737373;">sponsored</div>
+        </div>
+        <div style="margin-left:auto;font-size:18px;color:#262626;">···</div>
+      </div>
+      <!-- 카드 스와이퍼 -->
+      <div style="position:relative;background:#000;">
+        <div id="preview-swiper" style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;">
+        </div>
+        <div id="preview-dots" style="position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:4px;"></div>
+      </div>
+      <!-- 액션 버튼 -->
+      <div style="padding:10px 14px;background:#fff;border-top:1px solid #efefef;">
+        <div style="display:flex;gap:14px;margin-bottom:8px;font-size:22px;">
+          <span>🤍</span><span>💬</span><span>📤</span>
+          <span style="margin-left:auto;">🔖</span>
+        </div>
+        <div style="font-size:13px;font-weight:800;margin-bottom:4px;" id="preview-likes">좋아요 <b>128개</b></div>
+        <div style="font-size:13px;line-height:1.6;word-break:keep-all;" id="preview-caption"></div>
+        <div style="font-size:13px;color:#00376b;margin-top:4px;" id="preview-hashtags"></div>
+        <div style="font-size:12px;color:#737373;margin-top:6px;">2시간 전</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 공유 모달 -->
+<div id="share-modal" class="modal-overlay" onclick="closeShareModal(event)">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-head">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div class="modal-head-label">🔗 팀 공유</div>
+          <div class="modal-head-title">카드뉴스 링크 공유</div>
+        </div>
+        <button type="button" class="btn ghost" style="padding:6px 10px;font-size:12px" onclick="closeShareModal()">닫기</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div id="share-status" style="font-size:13px;color:#737373;margin-bottom:16px;">링크를 생성하고 있어요...</div>
+      <div id="share-link-box" style="display:none;">
+        <div style="font-size:12px;font-weight:700;color:#737373;margin-bottom:6px;">공유 링크 (30일 유효)</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input id="share-link-input" type="text" readonly style="flex:1;font-size:12px;padding:10px 12px;border:1px solid #ebebeb;border-radius:8px;background:#f5f5f5;font-family:inherit;" />
+          <button type="button" class="btn" onclick="copyShareLink()" style="white-space:nowrap;">복사</button>
+        </div>
+        <div style="margin-top:12px;padding:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:#047857;">
+          ✓ 링크를 받은 팀원은 별도 로그인 없이 카드뉴스를 확인할 수 있어요.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="loading" class="loading"><div class="spinner"></div><div id="loading-text">처리 중...</div></div>
 <div id="toast" class="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
+const SUPABASE_URL = 'https://tbvuipqcmyoyowkbfbmo.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRidnVpcHFjbXlveW93a2JmYm1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3NDcxMzIsImV4cCI6MjA5NzMyMzEzMn0.fhvWH6cjKEOaLupg7EDZ9ATX8g7ZBsOsLTvOEk3HuGU';
 const WORKER_API_BASE = 'https://hypokeimenon-worker.hypokeimenon001.workers.dev';
 const SUGGEST_DEFAULT = ['블록체인','가상자산','NFT','암호화폐','Web3','메타버스','디파이','코인','토큰','거래소'];
 
@@ -704,6 +777,7 @@ function init() {
   renderSearchChips();
   checkWorkerHealth(false);
   updateUsageUI();
+  loadSharedCards();
 }
 
 
@@ -762,6 +836,148 @@ function generateFromModal() {
   $('article-modal').classList.remove('show');
   document.body.style.overflow = '';
   generateFromArticle(modalArticleIndex);
+}
+
+
+// ── 인스타 미리보기 ──────────────────────────────
+function openPreview() {
+  if (!cards.length) { showToast('먼저 카드를 생성해 주세요.'); return; }
+  var swiper = document.getElementById('preview-swiper');
+  var dots = document.getElementById('preview-dots');
+  swiper.innerHTML = '';
+  dots.innerHTML = '';
+
+  // 매거진 설정 반영
+  var handle = (magSettings.magHandle || 'hypokeimenon').replace('@','');
+  document.getElementById('preview-profile-name').textContent = handle;
+  document.getElementById('preview-profile-initial').textContent = handle.charAt(0).toUpperCase();
+
+  cards.forEach(function(c, i) {
+    // 카드 복제
+    var original = document.getElementById('card-' + i);
+    if (!original) return;
+    var clone = original.cloneNode(true);
+    clone.style.width = '100%';
+    clone.style.minWidth = '100%';
+    clone.style.height = '380px';
+    clone.style.scrollSnapAlign = 'start';
+    clone.style.flexShrink = '0';
+    clone.removeAttribute('id');
+    swiper.appendChild(clone);
+
+    // 닷 인디케이터
+    var dot = document.createElement('div');
+    dot.style.cssText = 'width:6px;height:6px;border-radius:50%;background:' + (i===0?'#fff':'rgba(255,255,255,0.5)') + ';transition:.2s;';
+    dots.appendChild(dot);
+  });
+
+  // 스크롤 시 닷 업데이트
+  swiper.addEventListener('scroll', function() {
+    var idx = Math.round(swiper.scrollLeft / swiper.offsetWidth);
+    Array.from(dots.children).forEach(function(d, i) {
+      d.style.background = i===idx ? '#fff' : 'rgba(255,255,255,0.5)';
+    });
+  });
+
+  // 캡션/해시태그
+  document.getElementById('preview-caption').textContent = lastSummary.caption || '';
+  document.getElementById('preview-hashtags').textContent = Array.isArray(lastSummary.hashtags) ? lastSummary.hashtags.join(' ') : '';
+
+  document.getElementById('preview-modal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePreviewModal(e) {
+  if (e && e.target !== document.getElementById('preview-modal')) return;
+  document.getElementById('preview-modal').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+// ── 팀 공유 ──────────────────────────────────────
+async function shareCards() {
+  if (!cards.length) { showToast('먼저 카드를 생성해 주세요.'); return; }
+
+  document.getElementById('share-modal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('share-status').textContent = '링크를 생성하고 있어요...';
+  document.getElementById('share-link-box').style.display = 'none';
+
+  try {
+    // share_id 생성
+    var shareId = 'hypo-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    var title = cards[0] && cards[0].title ? cards[0].title.replace(/
+/g, ' ') : '히포케이메논 카드뉴스';
+
+    // Supabase 저장
+    var res = await fetch(SUPABASE_URL + '/rest/v1/cardnews_shares', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        share_id: shareId,
+        title: title,
+        cards: cards,
+        summary: lastSummary
+      })
+    });
+
+    if (!res.ok) throw new Error('저장 실패: ' + res.status);
+
+    // 공유 URL 생성
+    var shareUrl = location.origin + location.pathname + '?share=' + shareId;
+    document.getElementById('share-link-input').value = shareUrl;
+    document.getElementById('share-status').textContent = '✓ 링크가 생성됐어요!';
+    document.getElementById('share-link-box').style.display = 'block';
+
+  } catch(e) {
+    document.getElementById('share-status').textContent = '링크 생성 실패: ' + e.message;
+  }
+}
+
+function copyShareLink() {
+  var input = document.getElementById('share-link-input');
+  navigator.clipboard.writeText(input.value).then(function() {
+    showToast('링크를 복사했어요!');
+  });
+}
+
+function closeShareModal(e) {
+  if (e && e.target !== document.getElementById('share-modal')) return;
+  document.getElementById('share-modal').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+// ── 공유 링크로 접속 시 카드 불러오기 ──────────────
+async function loadSharedCards() {
+  var params = new URLSearchParams(location.search);
+  var shareId = params.get('share');
+  if (!shareId) return;
+
+  showLoading('공유된 카드뉴스를 불러오는 중...');
+  try {
+    var res = await fetch(SUPABASE_URL + '/rest/v1/cardnews_shares?share_id=eq.' + encodeURIComponent(shareId) + '&select=*', {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    var data = await res.json();
+    if (!data || !data[0]) throw new Error('카드를 찾을 수 없어요.');
+    var row = data[0];
+    cards = row.cards || [];
+    lastSummary = row.summary || {};
+    cardImages = {}; cardStyles = {}; cardAlign = {};
+    document.getElementById('cards-panel').style.display = 'block';
+    renderCards();
+    setStatus('ok', '공유된 카드뉴스를 불러왔어요: ' + (row.title || ''));
+    showToast('공유된 카드뉴스를 불러왔어요!');
+    setTimeout(function() { document.getElementById('cards-panel').scrollIntoView({ behavior: 'smooth' }); }, 200);
+  } catch(e) {
+    showToast('공유 링크 오류: ' + e.message);
+  } finally {
+    hideLoading();
+  }
 }
 
 window.addEventListener('DOMContentLoaded', init);
