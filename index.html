@@ -619,7 +619,7 @@ function normalizeCards(rawCards, article) {
   var findRole = function(role) { return arr.find(function(c) { return String(c && c.role || '').toUpperCase() === role; }) || null; };
   var hook = arr.find(function(c) { return c && c.type === 'hook'; }) || arr[0] || {};
   var cta = arr.find(function(c) { return c && c.type === 'cta'; }) || arr[4] || {};
-  var roles = ['NOW TRENDING', 'THE TAKEAWAY', "WHAT'S NEXT"];
+  var roles = ['NOW TRENDING', 'CONTEXT', 'THE TAKEAWAY', "WHAT'S NEXT", 'WHY IT MATTERS'];
   var magName = magSettings.magName || '와디즈 매거진';
   return [
     { label: 'HOOK', role: 'HOOK', title: clean(hook.title || ''), body: '', subtitle: clean(hook.subtitle || ''), type: 'hook', magName: magName },
