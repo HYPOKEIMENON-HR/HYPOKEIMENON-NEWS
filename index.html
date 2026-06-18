@@ -867,13 +867,12 @@ function generateFromModal() {
 function openPreview() {
   if (!cards.length) { showToast('먼저 카드를 생성해 주세요.'); return; }
   previewIndex = 0;
-  previewCanvases = new Array(cards.length).fill(null);
 
   var modal = document.getElementById('preview-modal');
   var imgBox = document.getElementById('preview-card-img');
   var dots = document.getElementById('preview-dots');
 
-  imgBox.innerHTML = '<div style="color:#555;font-size:12px;">카드 이미지 생성 중...</div>';
+  imgBox.innerHTML = '';
   dots.innerHTML = '';
 
   // 프로필
@@ -899,23 +898,36 @@ function openPreview() {
   // 버튼 이벤트
   document.getElementById('preview-close-btn').onclick = function() { closePreviewModal(); };
   document.getElementById('preview-prev-btn').onclick = function() { if (previewIndex > 0) renderPreviewCard(previewIndex - 1); };
-  document.getElementById('preview-next-btn').onclick = function() { if (previewIndex < previewCanvases.length - 1) renderPreviewCard(previewIndex + 1); };
+  document.getElementById('preview-next-btn').onclick = function() { if (previewIndex < cards.length - 1) renderPreviewCard(previewIndex + 1); };
 
-  // 캡처
-  // 카드 패널 스크롤 초기화
-  var cardRow = document.getElementById('card-row');
-  if (cardRow) cardRow.scrollLeft = 0;
+  // 바로 첫 카드 렌더링 (DOM 복제 방식)
+  renderPreviewCard(0);
+}
 
-  Promise.all(cards.map(function(c, i) {
-    var el = document.getElementById('card-' + i);
-    if (!el) return Promise.resolve();
-    var inner = el.querySelector('.card-inner') || el;
-    return html2canvas(inner, { scale: 1.5, useCORS: true, allowTaint: true, backgroundColor: '#111', logging: false })
-      .then(function(cv) { previewCanvases[i] = cv; })
-      .catch(function() {});
-  })).then(function() {
-    renderPreviewCard(0);
-  });
+function renderPreviewCard(idx) {
+  if (idx < 0 || idx >= cards.length) return;
+  previewIndex = idx;
+  var imgBox = document.getElementById('preview-card-img');
+  imgBox.innerHTML = '';
+
+  // 원본 카드 복제
+  var original = document.getElementById('card-' + idx);
+  if (original) {
+    var clone = original.cloneNode(true);
+    clone.removeAttribute('id');
+    clone.style.cssText = 'width:100%;height:100%;border-radius:0;position:relative;';
+    imgBox.appendChild(clone);
+  } else {
+    imgBox.innerHTML = '<div style="color:#555;font-size:12px;padding:20px;">카드를 찾을 수 없어요</div>';
+  }
+
+  // 닷 업데이트
+  var dotEls = document.getElementById('preview-dots').children;
+  for (var i = 0; i < dotEls.length; i++) {
+    dotEls[i].style.background = i === idx ? '#fff' : 'rgba(255,255,255,0.4)';
+  }
+  // 카운터
+  document.getElementById('preview-counter').textContent = (idx+1) + ' / ' + cards.length;
 }
 
 function closePreviewModal() {
