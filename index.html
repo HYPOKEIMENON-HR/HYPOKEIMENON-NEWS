@@ -905,8 +905,7 @@ async function shareCards() {
   try {
     // share_id 생성
     var shareId = 'hypo-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-    var title = cards[0] && cards[0].title ? cards[0].title.replace(/
-/g, ' ') : '히포케이메논 카드뉴스';
+    var title = cards[0] && cards[0].title ? cards[0].title.replace(/\n/g, ' ') : '히포케이메논 카드뉴스';
 
     // Supabase 저장
     var res = await fetch(SUPABASE_URL + '/rest/v1/cardnews_shares', {
