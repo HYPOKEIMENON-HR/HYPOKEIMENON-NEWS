@@ -269,45 +269,43 @@ h1 { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
 
 
 <!-- 인스타 미리보기 모달 -->
-<div id="preview-modal" class="modal-overlay" onclick="closePreviewModal(event)">
-  <div class="modal-box" style="max-width:420px;">
-    <div class="modal-head">
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div class="modal-head-label">📱 인스타그램 미리보기</div>
-        <button type="button" class="btn ghost" style="padding:6px 10px;font-size:12px" onclick="closePreviewModal()">닫기</button>
-      </div>
+<div id="preview-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9500;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:400px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.3);">
+    <!-- 헤더 -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #efefef;">
+      <span style="font-size:13px;font-weight:800;">📱 인스타그램 미리보기</span>
+      <button type="button" id="preview-close-btn" style="border:1px solid #ddd;background:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:700;">닫기</button>
     </div>
-    <div class="modal-body" style="padding:0;background:#fafafa;">
-      <!-- 인스타 프로필 헤더 -->
-      <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border-bottom:1px solid #efefef;">
-        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;" id="preview-profile-initial">H</div>
-        <div>
-          <div style="font-size:13px;font-weight:800;" id="preview-profile-name">hypokeimenon</div>
-          <div style="font-size:11px;color:#737373;">sponsored</div>
-        </div>
-        <div style="margin-left:auto;font-size:18px;color:#262626;">···</div>
+    <!-- 프로필 -->
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #efefef;">
+      <div id="preview-profile-initial" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#f09433,#dc2743,#bc1888);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;flex-shrink:0;">H</div>
+      <div>
+        <div id="preview-profile-name" style="font-size:13px;font-weight:800;">hypokeimenon</div>
+        <div style="font-size:11px;color:#737373;">sponsored</div>
       </div>
-      <!-- 카드 뷰어 -->
-      <div style="position:relative;background:#000;">
-        <div id="preview-swiper" style="position:relative;width:100%;aspect-ratio:1;overflow:hidden;display:flex;align-items:center;justify-content:center;scrollbar-width:none;">
-        </div>
-        <!-- 이전/다음 버튼 -->
-        <button type="button" onclick="previewPrev()" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.9);border:none;cursor:pointer;font-size:20px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:100;pointer-events:all;box-shadow:0 2px 8px rgba(0,0,0,0.3);">‹</button>
-        <button type="button" onclick="previewNext()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.9);border:none;cursor:pointer;font-size:20px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:100;pointer-events:all;box-shadow:0 2px 8px rgba(0,0,0,0.3);">›</button>
-        <div id="preview-dots" style="position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:4px;"></div>
-        <div id="preview-counter" style="position:absolute;top:8px;right:10px;font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);">1 / 5</div>
+      <div style="margin-left:auto;font-size:18px;color:#262626;">···</div>
+    </div>
+    <!-- 카드 이미지 -->
+    <div style="background:#111;position:relative;">
+      <div id="preview-card-img" style="width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;overflow:hidden;"></div>
+      <!-- 네비 버튼 -->
+      <div id="preview-prev-btn" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.88);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;font-weight:900;box-shadow:0 2px 8px rgba(0,0,0,.25);user-select:none;">‹</div>
+      <div id="preview-next-btn" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.88);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;font-weight:900;box-shadow:0 2px 8px rgba(0,0,0,.25);user-select:none;">›</div>
+      <!-- 카운터 -->
+      <div id="preview-counter" style="position:absolute;top:8px;right:10px;font-size:11px;font-weight:700;color:rgba(255,255,255,.7);">1 / 5</div>
+      <!-- 닷 -->
+      <div id="preview-dots" style="position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:4px;pointer-events:none;"></div>
+    </div>
+    <!-- 액션 -->
+    <div style="padding:10px 14px;background:#fff;">
+      <div style="display:flex;gap:14px;margin-bottom:8px;font-size:20px;">
+        <span>🤍</span><span>💬</span><span>📤</span>
+        <span style="margin-left:auto;">🔖</span>
       </div>
-      <!-- 액션 버튼 -->
-      <div style="padding:10px 14px;background:#fff;border-top:1px solid #efefef;">
-        <div style="display:flex;gap:14px;margin-bottom:8px;font-size:22px;">
-          <span>🤍</span><span>💬</span><span>📤</span>
-          <span style="margin-left:auto;">🔖</span>
-        </div>
-        <div style="font-size:13px;font-weight:800;margin-bottom:4px;" id="preview-likes">좋아요 <b>128개</b></div>
-        <div style="font-size:13px;line-height:1.6;word-break:keep-all;" id="preview-caption"></div>
-        <div style="font-size:13px;color:#00376b;margin-top:4px;" id="preview-hashtags"></div>
-        <div style="font-size:12px;color:#737373;margin-top:6px;">2시간 전</div>
-      </div>
+      <div style="font-size:13px;font-weight:800;margin-bottom:4px;">좋아요 <b>128개</b></div>
+      <div id="preview-caption" style="font-size:13px;line-height:1.6;word-break:keep-all;"></div>
+      <div id="preview-hashtags" style="font-size:13px;color:#00376b;margin-top:4px;"></div>
+      <div style="font-size:12px;color:#737373;margin-top:6px;">2시간 전</div>
     </div>
   </div>
 </div>
