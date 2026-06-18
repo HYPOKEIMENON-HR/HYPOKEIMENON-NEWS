@@ -724,7 +724,8 @@ async function openArticleModal(index) {
     }, 20000);
     var data = await res.json();
     if (data.ok && data.body) {
-      $('modal-body-text').textContent = data.body;
+     var cleaned = data.body.replace(/\.\s*/g, '.\n').replace(/\n{3,}/g, '\n\n');
+$('modal-body-text').textContent = cleaned;
     } else {
       $('modal-body-text').innerHTML = '<div class="modal-body-empty">본문을 불러오지 못했어요.<br>기사 원문을 직접 확인해주세요.</div>';
     }
