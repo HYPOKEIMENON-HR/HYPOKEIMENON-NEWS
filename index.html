@@ -900,19 +900,17 @@ function openPreview() {
   document.getElementById('preview-close-btn').onclick = function() { closePreviewModal(); };
   document.getElementById('preview-prev-btn').onclick = function() { if (previewIndex > 0) renderPreviewCard(previewIndex - 1); };
   document.getElementById('preview-next-btn').onclick = function() { if (previewIndex < previewCanvases.length - 1) renderPreviewCard(previewIndex + 1); };
-// 카드 패널 스크롤 위치 조정
+
+  // 캡처
+  // 카드 패널 스크롤 초기화
   var cardRow = document.getElementById('card-row');
   if (cardRow) cardRow.scrollLeft = 0;
 
-  // 캡처
-  Promise.all(cards.map(function(c, i) {
-// 캡처 — 카드 원본을 임시로 화면에 보이게 해서 캡처
   Promise.all(cards.map(function(c, i) {
     var el = document.getElementById('card-' + i);
     if (!el) return Promise.resolve();
-    // 카드 wrap 가져오기
-    var wrap = el.querySelector('.card-inner') || el;
-    return html2canvas(wrap, { scale: 1.5, useCORS: true, allowTaint: true, backgroundColor: '#111', logging: false })
+    var inner = el.querySelector('.card-inner') || el;
+    return html2canvas(inner, { scale: 1.5, useCORS: true, allowTaint: true, backgroundColor: '#111', logging: false })
       .then(function(cv) { previewCanvases[i] = cv; })
       .catch(function() {});
   })).then(function() {
