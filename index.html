@@ -414,7 +414,7 @@ async function workerApiJson(path, options) {
 async function checkWorkerHealth(toast) {
   try {
     var data = await workerApiJson('/health', { timeout: 9000 });
-    $('worker-version').textContent = data.version || 'connected';
+    $('worker-version').textContent = data.ok ? 'connected ✓' : 'connected';
     if (toast) showToast('Worker 연결 확인 완료');
   } catch(e) {
     $('worker-version').textContent = '연결 확인 필요';
