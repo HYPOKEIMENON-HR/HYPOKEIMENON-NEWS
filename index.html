@@ -866,63 +866,51 @@ function generateFromModal() {
 // ── 인스타 미리보기 ──────────────────────────────
 function openPreview() {
   if (!cards.length) { showToast('먼저 카드를 생성해 주세요.'); return; }
-  var swiper = document.getElementById('preview-swiper');
+  previewIndex = 0;
+  previewCanvases = new Array(cards.length).fill(null);
+
+  var modal = document.getElementById('preview-modal');
+  var imgBox = document.getElementById('preview-card-img');
   var dots = document.getElementById('preview-dots');
-  swiper.innerHTML = '';
+
+  imgBox.innerHTML = '<div style="color:#555;font-size:12px;">카드 이미지 생성 중...</div>';
   dots.innerHTML = '';
 
-  // 매거진 설정 반영
+  // 프로필
   var handle = (magSettings.magHandle || 'hypokeimenon').replace('@','');
   document.getElementById('preview-profile-name').textContent = handle;
   document.getElementById('preview-profile-initial').textContent = handle.charAt(0).toUpperCase();
 
-  // html2canvas로 각 카드를 이미지로 변환해서 스와이퍼에 추가
-  var swiperWidth = Math.min(380, window.innerWidth - 48);
-  swiper.style.width = swiperWidth + 'px';
-  swiper.style.overflowX = 'auto';
-  swiper.style.overflowY = 'hidden';
-  swiper.style.scrollSnapType = 'x mandatory';
-  swiper.style.webkitOverflowScrolling = 'touch';
-  swiper.style.scrollBehavior = 'smooth';
-
-  for (var ci = 0; ci < cards.length; ci++) {
-    (function(i) {
-      var original = document.getElementById('card-' + i);
-      if (!original) return;
-
-      // 이미지 슬라이드 생성
-      var slide = document.createElement('div');
-      slide.style.cssText = 'width:' + swiperWidth + 'px;min-width:' + swiperWidth + 'px;height:' + swiperWidth + 'px;scroll-snap-align:start;scroll-snap-stop:always;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#111;';
-
-      // 로딩 표시
-      slide.innerHTML = '<div style="color:#555;font-size:12px;">로딩 중...</div>';
-      swiper.appendChild(slide);
-
-      // 닷
-      var dot = document.createElement('div');
-      dot.style.cssText = 'width:6px;height:6px;border-radius:50%;background:' + (i===0?'#fff':'rgba(255,255,255,0.5)') + ';transition:.2s;flex-shrink:0;';
-      dots.appendChild(dot);
-
-      // html2canvas로 캡처
-      html2canvas(original, { scale: 1.5, useCORS: true, allowTaint: true, backgroundColor: null }).then(function(canvas) {
-        canvas.style.cssText = 'width:100%;height:100%;object-fit:contain;';
-        slide.innerHTML = '';
-        slide.appendChild(canvas);
-      }).catch(function() {
-        slide.innerHTML = '<div style="color:#555;font-size:11px;">미리보기 실패</div>';
-      });
-    })(ci);
+  // 닷 생성
+  for (var di = 0; di < cards.length; di++) {
+    var dot = document.createElement('div');
+    dot.style.cssText = 'width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.4);transition:.2s;flex-shrink:0;';
+    dots.appendChild(dot);
   }
 
-  // 스크롤 시 닷 업데이트
-  swiper.addEventListener('scroll', function() {
-    var idx = Math.round(swiper.scrollLeft / swiper.offsetWidth);
-    Array.from(dots.children).forEach(function(d, i) {
-      d.style.background = i===idx ? '#fff' : 'rgba(255,255,255,0.5)';
-    });
-  });
+  // 캡션
+  document.getElementById('preview-caption').textContent = lastSummary.caption || '';
+  document.getElementById('preview-hashtags').textContent = Array.isArray(lastSummary.hashtags) ? lastSummary.hashtags.join(' ') : '';
 
-  // 캡션/해시태그 (구버전 잔재 - 제거됨)
+  // 모달 표시
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  // 버튼 이벤트
+  document.getElementById('preview-close-btn').onclick = function() { closePreviewModal(); };
+  document.getElementById('preview-prev-btn').onclick = function() { if (previewIndex > 0) renderPreviewCard(previewIndex - 1); };
+  document.getElementById('preview-next-btn').onclick = function() { if (previewIndex < previewCanvases.length - 1) renderPreviewCard(previewIndex + 1); };
+
+  // 캡처
+  Promise.all(cards.map(function(c, i) {
+    var el = document.getElementById('card-' + i);
+    if (!el) return Promise.resolve();
+    return html2canvas(el, { scale: 1.5, useCORS: true, allowTaint: true, backgroundColor: null })
+      .then(function(cv) { previewCanvases[i] = cv; })
+      .catch(function() {});
+  })).then(function() {
+    renderPreviewCard(0);
+  });
 }
 
 function closePreviewModal() {
