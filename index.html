@@ -585,8 +585,9 @@ async function generateDigest(){
         .then(function(data){
           var raw=data.cards||[];
           var hook=raw.find(function(c){return c&&c.type==='hook'})||raw[0]||{};
-          var body1=raw.find(function(c){return c&&c.type==='body'})||raw[1]||{};
-          return{title:clean(hook.title||article.title),body:clean(body1.body||hook.subtitle||article.desc||''),source:article.domain||'',kw:article.sourceQuery||''};
+          var bodyCards=raw.filter(function(c){return c&&c.type==='body'});
+          var bodyText=bodyCards.map(function(c){return clean(c.body||'')}).filter(Boolean).join(' ');
+          return{title:clean(hook.title||article.title),body:bodyText||clean(hook.subtitle||article.desc||''),source:article.domain||'',kw:article.sourceQuery||''};
         }).catch(function(){
           return{title:clean(article.title),body:clean(article.desc||''),source:article.domain||'',kw:article.sourceQuery||''};
         });
@@ -603,7 +604,7 @@ async function generateDigest(){
       {label:'CTA',type:'cta',title:clean(magSettings.ctaHeadline||'"이거 왜 난리예요?"'),body:(magSettings.ctaCopy1||'복잡한 이슈, 핵심만 쉽게')+'\n'+(magSettings.ctaCopy2||'한 장씩 넘기면 정리 끝')}
     ]);
     cards.forEach(function(c,i){
-      if(c.type==='digest'||c.type==='digest-cover')cardStyles[i]={bg:'#0a0a0a',title:'#ffffff',body:'#ffffff',accent:'#c8f135',size:18,_ps:true};
+      if(c.type==='digest'||c.type==='digest-cover')cardStyles[i]={bg:'#0a0a0a',title:'#ffffff',body:'#ffffff',accent:'#c8f135',size:18,titleSize:18,bodySize:10,_ps:true};
     });
     lastSummary={caption:'이번 주 주요 뉴스',hashtags:['#이주의뉴스','#카드뉴스','#'+(currentQuery.replace(/\s+/g,'')||'트렌드')]};
     renderCards();
@@ -662,21 +663,60 @@ function digestCoverHtml(c,i){
 }
 function digestCardHtml(c,i){
   var st=styleOf(i),img=cardImages[i],accent=st.accent||'#c8f135';
+  var tSize=st.titleSize||st.size||18;
+  var bSize=st.bodySize||10;
   var badgeHtml='이주의뉴스'.split('').map(function(ch){return'<span style="display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;background:'+accent+';color:#111;font-size:7.5px;font-weight:900;border-radius:2px;">'+escapeHtml(ch)+'</span>'}).join('');
-  var tLen=(c.title||'').length,tSize=tLen>30?14:tLen>20?16:tLen>12?18:20;tSize=Math.min(tSize,st.size||18);
-  return'<div class="card-inner" style="background:'+(st.bg||'#0a0a0a')+';">'+(img?'<img src="'+img+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18">':'')+'<div style="position:absolute;top:12px;right:13px;font-size:7px;color:rgba(255,255,255,.38);font-weight:700;letter-spacing:.07em;text-transform:lowercase;">'+escapeHtml(c.source||'')+'</div><div style="position:absolute;top:26px;left:13px;display:flex;gap:2px;">'+badgeHtml+'</div><div style="position:absolute;top:54px;left:13px;right:13px;font-size:'+tSize+'px;font-weight:950;color:'+(st.title||'#fff')+';line-height:1.22;letter-spacing:-.04em;word-break:keep-all;">'+escapeHtml(c.title||'')+'</div><div style="position:absolute;bottom:13px;left:13px;right:13px;font-size:9.5px;color:rgba(255,255,255,.72);line-height:1.65;word-break:keep-all;letter-spacing:-.01em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;">'+escapeHtml(c.body||'')+'</div></div>';
+  return'<div class="card-inner" style="background:'+(st.bg||'#0a0a0a')+';display:flex;flex-direction:column;padding:13px;">'
+    +(img?'<img src="'+img+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18">':'')
+    // source 우상단
+    +'<div style="position:relative;z-index:2;text-align:right;font-size:7px;color:rgba(255,255,255,.38);font-weight:700;letter-spacing:.07em;margin-bottom:7px;">'+escapeHtml(c.source||'')+'</div>'
+    // 뱃지
+    +'<div style="position:relative;z-index:2;display:flex;gap:2px;margin-bottom:9px;">'+badgeHtml+'</div>'
+    // 헤드라인
+    +'<div style="position:relative;z-index:2;font-size:'+tSize+'px;font-weight:950;color:'+(st.title||'#fff')+';line-height:1.2;letter-spacing:-.04em;word-break:keep-all;margin-bottom:9px;">'+escapeHtml(c.title||'')+'</div>'
+    // 구분선
+    +'<div style="position:relative;z-index:2;width:28px;height:1.5px;background:'+accent+';margin-bottom:9px;border-radius:2px;"></div>'
+    // 본문 — flex:1로 남은 공간 꽉 채움
+    +'<div style="position:relative;z-index:2;flex:1;font-size:'+bSize+'px;color:rgba(255,255,255,.76);line-height:1.7;word-break:keep-all;letter-spacing:-.01em;overflow:hidden;">'+escapeHtml(c.body||'')+'</div>'
+    +'</div>';
 }
 
 // ─── 편집 ─────────────────────────────────────────────────
 function renderEdit(c,i){
   var st=styleOf(i),showBody=(c.type==='body'||c.type==='digest'||c.type==='cta'||c.type==='digest-cover');
+  var isDigest=(c.type==='digest'||c.type==='digest-cover');
   var div=document.createElement('div');div.className='edit-panel';
+  var sizeControls='';
+  if(isDigest){
+    var tSize=st.titleSize||st.size||18;
+    var bSize=st.bodySize||10;
+    sizeControls=
+      '<div class="edit-label">제목 크기</div>'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+      +'<input type="range" min="10" max="28" value="'+tSize+'" style="flex:1;accent-color:#111;" id="tsize-'+i+'" oninput="setDigestSize('+i+',\'titleSize\',this.value)">'
+      +'<span id="tsize-label-'+i+'" style="font-size:11px;font-weight:700;color:#737373;width:30px;text-align:right;">'+tSize+'pt</span>'
+      +'</div>'
+      +'<div class="edit-label">본문 크기</div>'
+      +'<div style="display:flex;align-items:center;gap:8px;">'
+      +'<input type="range" min="7" max="16" value="'+bSize+'" style="flex:1;accent-color:#111;" id="bsize-'+i+'" oninput="setDigestSize('+i+',\'bodySize\',this.value)">'
+      +'<span id="bsize-label-'+i+'" style="font-size:11px;font-weight:700;color:#737373;width:30px;text-align:right;">'+bSize+'pt</span>'
+      +'</div>';
+  }else{
+    sizeControls='<div class="size-row">크기 <input type="range" min="12" max="28" value="'+st.size+'" oninput="setStyle('+i+',\'size\',this.value)"></div>';
+  }
   div.innerHTML='<div class="edit-label">제목 수정</div><textarea id="title-'+i+'" class="title-input">'+escapeHtml(c.title||'')+'</textarea>'
     +(showBody?'<div class="edit-label">본문 수정</div><textarea id="body-'+i+'" class="body-input">'+escapeHtml(c.body||'')+'</textarea>':'')
     +'<div class="color-grid"><label class="color-item">배경 <input type="color" value="'+st.bg+'" onchange="setStyle('+i+',\'bg\',this.value)"></label><label class="color-item">제목 <input type="color" value="'+st.title+'" onchange="setStyle('+i+',\'title\',this.value)"></label><label class="color-item">강조 <input type="color" value="'+(st.accent||'#c8f135')+'" onchange="setStyle('+i+',\'accent\',this.value)"></label><label class="color-item">본문 <input type="color" value="'+st.body+'" onchange="setStyle('+i+',\'body\',this.value)"></label></div>'
-    +'<div class="size-row">크기 <input type="range" min="12" max="28" value="'+st.size+'" oninput="setStyle('+i+',\'size\',this.value)"></div>'
+    +sizeControls
     +'<button type="button" class="btn apply" onclick="applyText('+i+')">텍스트 적용</button>';
   return div;
+}
+function setDigestSize(i,key,val){
+  styleOf(i)[key]=Number(val);
+  // 라벨 즉시 업데이트
+  var labelId=(key==='titleSize'?'tsize':'bsize')+'-label-'+i;
+  var el=document.getElementById(labelId);if(el)el.textContent=val+'pt';
+  rerenderCard(i);
 }
 function setStyle(i,k,v){styleOf(i)[k]=k==='size'?Number(v):v;rerenderCard(i)}
 function rerenderCard(i){var el=$('card-'+i);if(el)el.innerHTML=cardHtml(cards[i],i);renderCaption()}
