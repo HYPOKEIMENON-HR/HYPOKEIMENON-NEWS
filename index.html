@@ -91,8 +91,8 @@ h1{font-size:26px;font-weight:800;letter-spacing:-.02em}
 .card-row{display:flex;gap:18px;min-width:max-content}
 .card-col{display:flex;flex-direction:column;align-items:center;gap:8px}
 .card-label{font-size:11px;color:#737373;font-weight:800;letter-spacing:.18em}
-.card-wrap{width:240px;height:240px;border-radius:16px;position:relative;background:transparent}
-.card-inner{position:relative;width:100%;height:100%;border-radius:16px;overflow:hidden;box-shadow:rgba(0,0,0,.20) 0 18px 34px -20px,rgba(0,0,0,.08) 0 6px 14px -8px}
+.card-wrap{width:240px;height:240px;border-radius:0;position:relative;background:transparent}
+.card-inner{position:relative;width:100%;height:100%;border-radius:0;overflow:hidden;box-shadow:rgba(0,0,0,.20) 0 18px 34px -20px,rgba(0,0,0,.08) 0 6px 14px -8px}
 .align-row{display:flex;gap:8px;align-items:center;width:240px}
 .align-row button{flex:1;height:34px;border:1px solid var(--rule);background:#fff;border-radius:7px;cursor:pointer;font-weight:800;color:#6c6678;font-family:inherit}
 .img-btn{width:240px;padding:9px 16px;border:1px solid var(--rule);background:#fff;border-radius:8px;cursor:pointer;font-weight:700;font-family:inherit;font-size:13px}
@@ -604,7 +604,8 @@ async function generateDigest(){
       {label:'CTA',type:'cta',title:clean(magSettings.ctaHeadline||'"이거 왜 난리예요?"'),body:(magSettings.ctaCopy1||'복잡한 이슈, 핵심만 쉽게')+'\n'+(magSettings.ctaCopy2||'한 장씩 넘기면 정리 끝')}
     ]);
     cards.forEach(function(c,i){
-      if(c.type==='digest'||c.type==='digest-cover')cardStyles[i]={bg:'#0a0a0a',title:'#ffffff',body:'#ffffff',accent:'#c8f135',size:18,titleSize:18,bodySize:10,_ps:true};
+      if(c.type==='digest')cardStyles[i]={bg:'#0a0a0a',title:'#ffffff',body:'#ffffff',accent:'#c8f135',size:18,titleSize:18,bodySize:10,_ps:true};
+      if(c.type==='digest-cover')cardStyles[i]={bg:'#0a0a0a',title:'#ffffff',body:'#ffffff',accent:'#c8f135',size:36,titleSize:36,bodySize:9,_ps:true};
     });
     lastSummary={caption:'이번 주 주요 뉴스',hashtags:['#이주의뉴스','#카드뉴스','#'+(currentQuery.replace(/\s+/g,'')||'트렌드')]};
     renderCards();
@@ -651,7 +652,9 @@ function hookCardHtml(c,i){
 }
 function ctaCardHtml(c,i){
   var st=styleOf(i),img=cardImages[i],mName=magSettings.magName||'MAGAZINIE',mHandle=magSettings.magHandle||'magazinie';
-  return'<div class="card-inner" style="background:'+st.bg+';padding:22px;color:#fff;display:flex;flex-direction:column">'+(img?'<img src="'+img+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.25">':'')+'<div style="position:relative;z-index:2;font-size:10px;color:#999;font-weight:800;margin-bottom:14px">'+escapeHtml(mName.toUpperCase())+'</div><div style="position:relative;z-index:2;font-size:17px;font-weight:950;margin-bottom:14px;white-space:pre-line;color:'+st.title+'">'+escapeHtml(c.title||'')+'</div><div style="position:relative;z-index:2;font-size:12px;color:#777;line-height:1.6;white-space:pre-line">'+escapeHtml(c.body||'')+'</div><div style="position:relative;z-index:2;margin-top:auto;font-size:12px;font-weight:900;color:#555">'+escapeHtml(mHandle)+'</div></div>';
+  var tSize=st.size||17;
+  var bSize=Math.max(10,tSize-5);
+  return'<div class="card-inner" style="background:'+st.bg+';padding:22px;color:#fff;display:flex;flex-direction:column">'+(img?'<img src="'+img+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.25">':'')+'<div style="position:relative;z-index:2;font-size:10px;color:#999;font-weight:800;margin-bottom:14px">'+escapeHtml(mName.toUpperCase())+'</div><div style="position:relative;z-index:2;font-size:'+tSize+'px;font-weight:950;margin-bottom:14px;white-space:pre-line;color:'+st.title+'">'+escapeHtml(c.title||'')+'</div><div style="position:relative;z-index:2;font-size:'+bSize+'px;color:#777;line-height:1.6;white-space:pre-line">'+escapeHtml(c.body||'')+'</div><div style="position:relative;z-index:2;margin-top:auto;font-size:12px;font-weight:900;color:#555">'+escapeHtml(mHandle)+'</div></div>';
 }
 function bodyCardHtml(c,i){
   var st=styleOf(i),img=cardImages[i];
@@ -659,7 +662,9 @@ function bodyCardHtml(c,i){
 }
 function digestCoverHtml(c,i){
   var st=styleOf(i),img=cardImages[i],accent=st.accent||'#c8f135',mName=(c.magName||magSettings.magName||'HYPOKEIMENON').toUpperCase();
-  return'<div class="card-inner" style="background:'+(st.bg||'#0a0a0a')+';display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:26px;">'+(img?'<img src="'+img+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.16">':'')+'<div style="position:relative;z-index:2;font-size:8px;color:rgba(255,255,255,.35);font-weight:800;letter-spacing:.2em;margin-bottom:20px;text-transform:uppercase;">'+escapeHtml(mName)+'</div><div style="position:relative;z-index:2;font-size:40px;font-weight:950;line-height:1.0;letter-spacing:-.05em;"><span style="color:'+accent+'">이주의</span><br><span style="color:#fff">뉴스</span></div><div style="position:relative;z-index:2;margin-top:20px;width:32px;height:2px;background:'+accent+';border-radius:2px;"></div><div style="position:relative;z-index:2;margin-top:12px;font-size:9px;color:rgba(255,255,255,.35);font-weight:700;letter-spacing:.08em;">'+escapeHtml(c.body||'')+'</div></div>';
+  var tSize=st.titleSize||36;
+  var bSize=st.bodySize||9;
+  return'<div class="card-inner" style="background:'+(st.bg||'#0a0a0a')+';display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:26px;">'+(img?'<img src="'+img+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.16">':'')+'<div style="position:relative;z-index:2;font-size:8px;color:rgba(255,255,255,.35);font-weight:800;letter-spacing:.2em;margin-bottom:20px;text-transform:uppercase;">'+escapeHtml(mName)+'</div><div style="position:relative;z-index:2;font-size:'+tSize+'px;font-weight:950;line-height:1.0;letter-spacing:-.05em;"><span style="color:'+accent+'">이주의</span><br><span style="color:#fff">뉴스</span></div><div style="position:relative;z-index:2;margin-top:20px;width:32px;height:2px;background:'+accent+';border-radius:2px;"></div><div style="position:relative;z-index:2;margin-top:12px;font-size:'+bSize+'px;color:rgba(255,255,255,.35);font-weight:700;letter-spacing:.08em;">'+escapeHtml(c.body||'')+'</div></div>';
 }
 function digestCardHtml(c,i){
   var st=styleOf(i),img=cardImages[i],accent=st.accent||'#c8f135';
@@ -674,7 +679,7 @@ function digestCardHtml(c,i){
   var bodyH=Math.max(lineH, Math.floor(bodyAvail/lineH)*lineH);
   return'<div class="card-inner" style="background:'+(st.bg||'#0a0a0a')+';padding:13px;">'
     +(img?'<img src="'+img+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18">':'')
-    +'<div style="position:relative;z-index:2;text-align:right;font-size:7px;color:rgba(255,255,255,.38);font-weight:700;letter-spacing:.07em;margin-bottom:6px;line-height:1.57;">'+escapeHtml(c.source||'')+'</div>'
+
     +'<div style="position:relative;z-index:2;display:flex;gap:2px;margin-bottom:8px;">'+badgeHtml+'</div>'
     +'<div style="position:relative;z-index:2;font-size:'+tSize+'px;font-weight:950;color:'+(st.title||'#fff')+';line-height:1.2;letter-spacing:-.04em;word-break:keep-all;margin-bottom:8px;max-height:'+titleMaxH+'px;overflow:hidden;">'+escapeHtml(c.title||'')+'</div>'
     +'<div style="position:relative;z-index:2;width:28px;height:1.5px;background:'+accent+';margin-bottom:8px;border-radius:2px;"></div>'
