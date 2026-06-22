@@ -541,7 +541,7 @@ async function generateFromArticle(index){
   setStatus('warn','본문 수집 + AI 요약 중...');
   showLoading('본문 수집 + AI 요약 중...');
   try{
-    var manualText=TITLE_GUIDELINE;var t=$('manual-text').value.trim();if(t.length>=80)manualText+=' [선택기사본문]'+t;
+    var manualText='';var t=$('manual-text').value.trim();if(t.length>=80)manualText='[선택기사본문]'+t;
     var data=await workerApiJson('/generate-cardnews',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({article:article,query:currentQuery,manualText:manualText}),timeout:60000});
     if(token!==generationSeq)return;
     cards=normalizeCards(data.cards||[],article);
