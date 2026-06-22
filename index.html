@@ -354,6 +354,9 @@ var modalArticleIndex=-1;
 var lastSummary={caption:'',hashtags:[]};
 var DAILY_LIMIT=10;
 
+// 모든 생성 요청에 공통으로 주입되는 제목 작성 지침
+var TITLE_GUIDELINE='[제목 작성 지침] 기사 본문의 핵심 상태를 제목에 반드시 반영하세요. 법안이 발의된 경우 "발의", 국회 심사 중이면 "심사 중", 추진/검토 중이면 "추진 중", 예정이면 "예정" 등의 단어를 제목 안에 포함하세요. 아직 확정·시행되지 않은 내용을 이미 확정된 것처럼 단정지어 표현하지 마세요.';
+
 function $(id){return document.getElementById(id)}
 function decodeHtml(v){var t=document.createElement('textarea');t.innerHTML=String(v||'');return t.value}
 function clean(v){return decodeHtml(String(v||'')).replace(/<[^>]+>/g,' ').replace(/[""]/g,'"').replace(/['']/g,"'").replace(/\s+/g,' ').trim()}
@@ -538,7 +541,7 @@ async function generateFromArticle(index){
   setStatus('warn','본문 수집 + AI 요약 중...');
   showLoading('본문 수집 + AI 요약 중...');
   try{
-    var manualText='';var t=$('manual-text').value.trim();if(t.length>=80)manualText='[선택기사본문]'+t;
+    var manualText=TITLE_GUIDELINE;var t=$('manual-text').value.trim();if(t.length>=80)manualText+=' [선택기사본문]'+t;
     var data=await workerApiJson('/generate-cardnews',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({article:article,query:currentQuery,manualText:manualText}),timeout:60000});
     if(token!==generationSeq)return;
     cards=normalizeCards(data.cards||[],article);
@@ -581,7 +584,7 @@ async function generateDigest(){
   showLoading('다이제스트 카드뉴스 만드는 중...',savedArticles.length+'개 기사를 동시에 요약하고 있어요');
   try{
     var promises=savedArticles.map(function(article){
-      return workerApiJson('/generate-cardnews',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({article:article,query:article.sourceQuery||currentQuery,manualText:''}),timeout:90000})
+      return workerApiJson('/generate-cardnews',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({article:article,query:article.sourceQuery||currentQuery,manualText:TITLE_GUIDELINE}),timeout:90000})
         .then(function(data){
           var raw=data.cards||[];
           var hook=raw.find(function(c){return c&&c.type==='hook'})||raw[0]||{};
