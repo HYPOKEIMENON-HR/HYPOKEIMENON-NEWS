@@ -665,22 +665,22 @@ function digestCardHtml(c,i){
   var st=styleOf(i),img=cardImages[i],accent=st.accent||'#c8f135';
   var tSize=st.titleSize||st.size||18;
   var bSize=st.bodySize||10;
+  var lineH=bSize*1.7;
   var badgeHtml='이주의뉴스'.split('').map(function(ch){return'<span style="display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;background:'+accent+';color:#111;font-size:7.5px;font-weight:900;border-radius:2px;">'+escapeHtml(ch)+'</span>'}).join('');
-  return'<div class="card-inner" style="background:'+(st.bg||'#0a0a0a')+';display:flex;flex-direction:column;padding:13px;">'
+  // 고정 영역 높이 계산 후 body 높이를 lineH 배수로 맞춤 (중간 짤림 방지)
+  var titleMaxH=Math.ceil(tSize*1.2*3);
+  var fixedH=13+11+6+15+8+titleMaxH+8+1.5+8+12;
+  var bodyAvail=240-fixedH;
+  var bodyH=Math.max(lineH, Math.floor(bodyAvail/lineH)*lineH);
+  return'<div class="card-inner" style="background:'+(st.bg||'#0a0a0a')+';padding:13px;">'
     +(img?'<img src="'+img+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18">':'')
-    // source 우상단
-    +'<div style="position:relative;z-index:2;text-align:right;font-size:7px;color:rgba(255,255,255,.38);font-weight:700;letter-spacing:.07em;margin-bottom:7px;">'+escapeHtml(c.source||'')+'</div>'
-    // 뱃지
-    +'<div style="position:relative;z-index:2;display:flex;gap:2px;margin-bottom:9px;">'+badgeHtml+'</div>'
-    // 헤드라인
-    +'<div style="position:relative;z-index:2;font-size:'+tSize+'px;font-weight:950;color:'+(st.title||'#fff')+';line-height:1.2;letter-spacing:-.04em;word-break:keep-all;margin-bottom:9px;">'+escapeHtml(c.title||'')+'</div>'
-    // 구분선
-    +'<div style="position:relative;z-index:2;width:28px;height:1.5px;background:'+accent+';margin-bottom:9px;border-radius:2px;"></div>'
-    // 본문 — flex:1로 남은 공간 꽉 채움
-    +'<div style="position:relative;z-index:2;flex:1;font-size:'+bSize+'px;color:rgba(255,255,255,.76);line-height:1.7;word-break:keep-all;letter-spacing:-.01em;overflow:hidden;">'+escapeHtml(c.body||'')+'</div>'
+    +'<div style="position:relative;z-index:2;text-align:right;font-size:7px;color:rgba(255,255,255,.38);font-weight:700;letter-spacing:.07em;margin-bottom:6px;line-height:1.57;">'+escapeHtml(c.source||'')+'</div>'
+    +'<div style="position:relative;z-index:2;display:flex;gap:2px;margin-bottom:8px;">'+badgeHtml+'</div>'
+    +'<div style="position:relative;z-index:2;font-size:'+tSize+'px;font-weight:950;color:'+(st.title||'#fff')+';line-height:1.2;letter-spacing:-.04em;word-break:keep-all;margin-bottom:8px;max-height:'+titleMaxH+'px;overflow:hidden;">'+escapeHtml(c.title||'')+'</div>'
+    +'<div style="position:relative;z-index:2;width:28px;height:1.5px;background:'+accent+';margin-bottom:8px;border-radius:2px;"></div>'
+    +'<div style="position:relative;z-index:2;height:'+bodyH+'px;font-size:'+bSize+'px;color:rgba(255,255,255,.76);line-height:1.7;word-break:keep-all;letter-spacing:-.01em;overflow:hidden;">'+escapeHtml(c.body||'')+'</div>'
     +'</div>';
 }
-
 // ─── 편집 ─────────────────────────────────────────────────
 function renderEdit(c,i){
   var st=styleOf(i),showBody=(c.type==='body'||c.type==='digest'||c.type==='cta'||c.type==='digest-cover');
@@ -770,9 +770,20 @@ function openPreview(){
 }
 function renderPreviewCard(idx){
   if(idx<0||idx>=cards.length)return;previewIndex=idx;
-  var imgBox=document.getElementById('preview-card-img');imgBox.innerHTML='';
+  var imgBox=document.getElementById('preview-card-img');
+  imgBox.innerHTML='';
+  imgBox.style.cssText='width:100%;aspect-ratio:1;position:relative;overflow:hidden;display:block;';
   var original=document.getElementById('card-'+idx);
-  if(original){var clone=original.cloneNode(true);clone.removeAttribute('id');clone.style.cssText='width:100%;height:100%;border-radius:0;position:relative;';imgBox.appendChild(clone)}
+  if(original){
+    // 카드는 항상 240px — 컨테이너 크기에 맞게 scale 변환 (비율 완전 보존)
+    var containerW=imgBox.offsetWidth||370;
+    var scale=containerW/240;
+    var clone=original.cloneNode(true);
+    clone.removeAttribute('id');
+    clone.style.cssText='width:240px;height:240px;transform:scale('+scale+');transform-origin:top left;position:absolute;top:0;left:0;border-radius:0;';
+    imgBox.style.height=containerW+'px';
+    imgBox.appendChild(clone);
+  }
   var dotEls=document.getElementById('preview-dots').children;
   for(var i=0;i<dotEls.length;i++)dotEls[i].style.background=i===idx?'#fff':'rgba(255,255,255,0.4)';
   document.getElementById('preview-counter').textContent=(idx+1)+' / '+cards.length;
