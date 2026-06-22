@@ -65,14 +65,25 @@ h1 { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
 .results { display: none; }
 .result-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: #737373; font-size: 13px; margin-bottom: 12px; }
 .article-list { display: grid; gap: 8px; }
-.article { display: grid; grid-template-columns: 54px 1fr auto; gap: 12px; align-items: center; padding: 12px; border: 1px solid var(--rule); border-radius: 10px; background: #fff; cursor: pointer; transition: border-color .12s, box-shadow .12s, transform .12s; }
-.article:hover, .article.selected { border-color: #111; box-shadow: rgba(20,16,25,.13) 0 12px 28px -20px; transform: translateY(-1px); }
+.article { display: grid; grid-template-columns: 32px 54px 1fr auto; gap: 12px; align-items: center; padding: 12px; border: 1px solid var(--rule); border-radius: 10px; background: #fff; cursor: pointer; transition: border-color .12s, box-shadow .12s, transform .12s; }
+.article:hover, .article.selected, .article.checked { border-color: #111; box-shadow: rgba(20,16,25,.13) 0 12px 28px -20px; transform: translateY(-1px); }
 .thumb { width: 54px; height: 50px; border-radius: 8px; background: linear-gradient(140deg,rgba(255,158,199,.2),rgba(185,163,245,.22)); display: flex; align-items: center; justify-content: center; font-size: 20px; }
 .article-info { min-width: 0; }
 .article-title { font-size: 13px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
 .article-sub, .article-desc { font-size: 11px; color: #737373; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .article-sub { margin-bottom: 3px; }
 .article button { white-space: nowrap; }
+
+.article-check { display:flex; align-items:center; justify-content:center; }
+.article-check input { width: 18px; height: 18px; accent-color: #111; cursor: pointer; }
+.article-actions { display:flex; align-items:center; justify-content:space-between; gap:12px; border:1px solid var(--rule); border-radius:10px; padding:12px 14px; margin-bottom:12px; background:#fbfbfd; }
+.article-actions-left { min-width:0; }
+.article-actions-title { font-size:13px; font-weight:900; color:#111; margin-bottom:4px; }
+.article-actions-desc { font-size:12px; color:#737373; line-height:1.5; word-break:keep-all; }
+.article-actions-buttons { display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+.selected-count-pill { display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:24px; padding:0 9px; border-radius:999px; background:#111; color:#fff; font-size:12px; font-weight:900; }
+.brief-mini-label { display:inline-flex; align-items:center; justify-content:center; padding:3px 6px; border-radius:3px; background:#eff45b; color:#111; font-weight:950; letter-spacing:-.04em; }
+
 
 /* 카드 패널 */
 .cards-panel { display: none; }
@@ -85,7 +96,7 @@ h1 { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
 .card-row { display: flex; gap: 18px; min-width: max-content; }
 .card-col { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .card-label { font-size: 11px; color: #737373; font-weight: 800; letter-spacing: .18em; }
-.card-wrap { width: 240px; height: 240px; border-radius: 16px; position: relative; background: transparent; }
+.card-wrap { width: 240px; height: 300px; border-radius: 16px; position: relative; background: transparent; }
 .card-inner { position: relative; width: 100%; height: 100%; border-radius: 16px; overflow: hidden; box-shadow: rgba(0,0,0,.20) 0 18px 34px -20px, rgba(0,0,0,.08) 0 6px 14px -8px; }
 .align-row { display: flex; gap: 8px; align-items: center; width: 240px; }
 .align-row button { flex: 1; height: 34px; border: 1px solid var(--rule); background: #fff; border-radius: 7px; cursor: pointer; font-weight: 800; color: #6c6678; font-family: inherit; }
@@ -144,9 +155,9 @@ h1 { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
   .download-row { display: block; }
   .download-row .btn { margin-top: 12px; }
   .card-wrap, .img-btn, .align-row { width: 220px; }
-  .card-wrap { height: 220px; }
+  .card-wrap { height: 275px; }
   .edit-panel { width: 220px; min-width: 220px; }
-  .article { grid-template-columns: 46px 1fr; }
+  .article { grid-template-columns: 30px 46px 1fr; }
   .article button { grid-column: 1/-1; }
   .thumb { width: 46px; height: 44px; }
 }
@@ -168,7 +179,7 @@ h1 { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
     <div class="side-steps-head">카드뉴스 만드는 순서</div>
     <ol class="side-step-list">
       <li class="side-step"><span class="side-step-num">1</span><span><b class="side-step-title">기사 검색</b><br><span class="side-step-desc">키워드를 넣고 뉴스를 불러와요.</span></span></li>
-      <li class="side-step"><span class="side-step-num">2</span><span><b class="side-step-title">기사 선택</b><br><span class="side-step-desc">기사를 클릭하면 AI가 5컷을 만들어요.</span></span></li>
+      <li class="side-step"><span class="side-step-num">2</span><span><b class="side-step-title">기사 선택</b><br><span class="side-step-desc">본문 보기 또는 체크해서 브리프를 만들어요.</span></span></li>
       <li class="side-step"><span class="side-step-num">3</span><span><b class="side-step-title">편집</b><br><span class="side-step-desc">문장·색상·이미지를 다듬어요.</span></span></li>
       <li class="side-step"><span class="side-step-num">4</span><span><b class="side-step-title">저장</b><br><span class="side-step-desc">PNG/ZIP으로 다운로드해요.</span></span></li>
     </ol>
@@ -182,7 +193,7 @@ h1 { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
       <div>
         <div class="section-label">Step 2</div>
         <h1>카드뉴스 만들기</h1>
-        <p class="lead">키워드로 기사를 검색하고, 기사를 선택하면 AI가 5컷 카드뉴스를 자동으로 만들어요.</p>
+        <p class="lead">키워드로 기사를 검색하고, 기사 1개는 기존 5컷 카드뉴스로 만들고 기사 3~4개는 기사별 1장 브리프로 묶을 수 있어요.</p>
       </div>
       <span id="usage-counter" style="font-size:12px;font-weight:700;color:#737373;"></span>
       <span class="worker-status-pill">
@@ -216,6 +227,16 @@ h1 { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
         <span><b>NAVER</b> 검색 결과 · <span id="result-source">-</span></span>
         <span><span id="result-count">0</span>건</span>
       </div>
+      <div class="article-actions">
+        <div class="article-actions-left">
+          <div class="article-actions-title">기사별 1장 브리프 만들기 <span id="selected-count" class="selected-count-pill">0</span></div>
+          <div class="article-actions-desc">체크한 기사 3~4개를 각각 1장 요약 카드로 만듭니다. 기사끼리 내용을 섞지 않아요.</div>
+        </div>
+        <div class="article-actions-buttons">
+          <button type="button" class="btn ghost" onclick="clearArticleSelection()">선택 해제</button>
+          <button type="button" class="btn" id="brief-generate-btn" onclick="generateBriefFromSelected()">선택 기사 브리프 만들기</button>
+        </div>
+      </div>
       <div id="article-list" class="article-list"></div>
     </section>
 
@@ -224,7 +245,7 @@ h1 { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
       <div id="source-status" class="source-status"></div>
       <div class="download-row">
         <div>
-          <div class="hint"><b>카드 저장하기</b> — 옆으로 스크롤해서 5컷을 확인하세요.</div>
+          <div class="hint"><b>카드 저장하기</b> — 옆으로 스크롤해서 생성된 카드를 확인하세요.</div>
           <div class="hint">각 카드 하단에서 정렬·이미지를 바꾸고, 아래 편집 패널에서 문장을 다듬을 수 있어요.</div>
         </div>
         <button type="button" class="btn ghost" onclick="openPreview()">📱 인스타 미리보기</button>
@@ -287,7 +308,7 @@ h1 { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
     </div>
     <!-- 카드 이미지 -->
     <div style="background:#111;position:relative;">
-      <div id="preview-card-img" style="width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;overflow:hidden;"></div>
+      <div id="preview-card-img" style="width:100%;aspect-ratio:4/5;display:flex;align-items:center;justify-content:center;overflow:hidden;"></div>
       <!-- 네비 버튼 -->
       <div id="preview-prev-btn" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.88);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;font-weight:900;box-shadow:0 2px 8px rgba(0,0,0,.25);user-select:none;">‹</div>
       <div id="preview-next-btn" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.88);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;font-weight:900;box-shadow:0 2px 8px rgba(0,0,0,.25);user-select:none;">›</div>
@@ -352,6 +373,9 @@ const SUGGEST_DEFAULT = ['블록체인','가상자산','NFT','암호화폐','Web
 var searchTags = [];
 var currentArticles = [];
 var selectedArticleIndex = -1;
+var selectedArticles = {};
+var articleBodyCache = {};
+var currentOutputMode = 'cardnews';
 var cards = [];
 var cardImages = {};
 var cardStyles = {};
@@ -532,6 +556,7 @@ async function searchNews() {
   if (!q) { showToast('키워드를 입력해 주세요.'); return; }
   lastQuery = q;
   $('manual-text').value = '';
+  selectedArticles = {}; articleBodyCache = {}; currentOutputMode = 'cardnews';
   cards = []; cardImages = {}; cardStyles = {}; cardAlign = {}; lastSummary = { caption: '', hashtags: [] };
   $('cards-panel').style.display = 'none';
   showLoading('"' + q + '" 뉴스 검색 중...');
@@ -559,9 +584,13 @@ function renderArticles() {
     if (a.pubDate) {
       try { date = new Date(a.pubDate).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }); } catch(e) {}
     }
+    var checked = !!selectedArticles[i];
     var div = document.createElement('div');
-    div.className = 'article' + (selectedArticleIndex === i ? ' selected' : '');
-    div.innerHTML = '<div class="thumb">📰</div>'
+    div.className = 'article' + (selectedArticleIndex === i ? ' selected' : '') + (checked ? ' checked' : '');
+    div.innerHTML = '<label class="article-check" title="브리프에 포함">'
+      + '<input type="checkbox" ' + (checked ? 'checked' : '') + ' onchange="toggleArticleSelection(' + i + ', this.checked, event)">'
+      + '</label>'
+      + '<div class="thumb">📰</div>'
       + '<div class="article-info">'
       + '<div class="article-title">' + escapeHtml(a.title) + '</div>'
       + '<div class="article-sub">' + escapeHtml(date) + ' · ' + escapeHtml(a.domain || '') + '</div>'
@@ -570,8 +599,219 @@ function renderArticles() {
       + '<button type="button" class="btn">본문 보기</button>';
     div.addEventListener('click', function() { openArticleModal(i); });
     div.querySelector('button').addEventListener('click', function(e) { e.stopPropagation(); openArticleModal(i); });
+    div.querySelector('input').addEventListener('click', function(e) { e.stopPropagation(); });
     list.appendChild(div);
   });
+  updateSelectedCount();
+}
+
+function getSelectedArticleIndexes() {
+  return Object.keys(selectedArticles).filter(function(k) { return selectedArticles[k]; }).map(Number).sort(function(a, b) { return a - b; });
+}
+
+function updateSelectedCount() {
+  var count = getSelectedArticleIndexes().length;
+  var el = $('selected-count');
+  if (el) el.textContent = count;
+  var btn = $('brief-generate-btn');
+  if (btn) btn.disabled = count === 0;
+}
+
+function toggleArticleSelection(index, checked, event) {
+  if (event) event.stopPropagation();
+  if (checked) {
+    var count = getSelectedArticleIndexes().length;
+    if (!selectedArticles[index] && count >= 4) {
+      showToast('브리프는 최대 4개 기사까지 선택할 수 있어요.');
+      renderArticles();
+      return;
+    }
+    selectedArticles[index] = true;
+  } else {
+    delete selectedArticles[index];
+  }
+  renderArticles();
+}
+
+function clearArticleSelection() {
+  selectedArticles = {};
+  renderArticles();
+  showToast('선택을 해제했어요.');
+}
+
+function cleanFetchedBody(raw) {
+  return clean(String(raw || '')
+    .replace(/var\s+\w+\s*=\s*[^;]{0,80};/g, ' ')
+    .replace(/ⓒ\s*\S+/g, '')
+    .replace(/\[사진[^\]]*\]/g, '')
+    .replace(/\[이미지[^\]]*\]/g, '')
+    .replace(/사진\s*=\s*[^\s]+/g, ' ')
+    .replace(/\s{2,}/g, ' '));
+}
+
+async function fetchArticleBody(article) {
+  var cacheKey = article.origin || article.url || article.title;
+  if (articleBodyCache[cacheKey]) return articleBodyCache[cacheKey];
+  var res = await fetchWithTimeout(WORKER_API_BASE + '/fetch-article', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ url: article.url, origin: article.origin, title: article.title, desc: article.desc })
+  }, 22000);
+  var data = await res.json();
+  var body = data && data.ok && data.body ? cleanFetchedBody(data.body) : '';
+  articleBodyCache[cacheKey] = body;
+  return body;
+}
+
+function splitSentences(text) {
+  var s = clean(text);
+  if (!s) return [];
+  s = s.replace(/([.?!])\s+/g, '$1|')
+       .replace(/(다\.)\s+/g, '$1|')
+       .replace(/(요\.)\s+/g, '$1|')
+       .replace(/(니다\.)\s+/g, '$1|');
+  return s.split('|').map(function(x) { return clean(x); }).filter(function(x) { return x.length >= 22 && !/기자\s*=|무단전재|재배포|Copyright|구독|로그인/.test(x); });
+}
+
+function makeTwoLineHeadline(title) {
+  var s = clean(title).replace(/\[[^\]]+\]/g, '').replace(/\([^)]*\)/g, '').replace(/[|｜].*$/g, '').trim();
+  if (s.length <= 20) return s;
+  var cut = Math.min(22, Math.max(12, Math.round(s.length / 2)));
+  var near = s.slice(8, 28).search(/[ ,·…“”'"-]/);
+  if (near > 0) cut = 8 + near + 1;
+  return s.slice(0, cut).trim() + '\n' + s.slice(cut, 44).trim() + (s.length > 44 ? '…' : '');
+}
+
+function makeExtractiveBrief(article, body) {
+  var sentences = splitSentences(body || article.desc || '');
+  if (!sentences.length || clean(body).length < 120) {
+    return {
+      headline: makeTwoLineHeadline(article.title || '본문 확인 필요'),
+      body: '본문 확인 필요. 기사 본문 수집이 부족해 원문 확인 후 요약을 보완해 주세요.'
+    };
+  }
+  var scored = sentences.map(function(s, idx) {
+    var score = 0;
+    if (/[0-9０-９]/.test(s)) score += 4;
+    if (/(에 따르면|밝혔다|자료|조사|발표|제출|확인|집계|위원회|정부|회사|기관|의원실|업계|검찰|경찰)/.test(s)) score += 3;
+    if (idx < 5) score += 2;
+    if (s.length > 140) score -= 1;
+    return { s: s, idx: idx, score: score };
+  });
+  var picked = scored.sort(function(a, b) { return b.score - a.score; }).slice(0, 4).sort(function(a, b) { return a.idx - b.idx; }).map(function(x) { return x.s; });
+  var bodyText = picked.join(' ');
+  if (bodyText.length > 430) bodyText = bodyText.slice(0, 428).replace(/\s+\S*$/, '') + '…';
+  return { headline: makeTwoLineHeadline(article.title), body: bodyText };
+}
+
+function normalizeBriefCardsFromWorker(rawCards, articles) {
+  var arr = Array.isArray(rawCards) ? rawCards : [];
+  return articles.map(function(article, i) {
+    var c = arr[i] || {};
+    var fallback = makeExtractiveBrief(article, article.body || article.desc || '');
+    return {
+      label: 'NEWS ' + String(i + 1).padStart(2, '0'),
+      role: 'ARTICLE BRIEF',
+      title: clean(c.headline || c.title || fallback.headline),
+      body: clean(c.body || c.summary || fallback.body),
+      sourceTitle: article.title,
+      sourceDomain: article.domain || '',
+      sourceDate: article.pubDate || '',
+      type: 'brief'
+    };
+  });
+}
+
+function makeBriefCards(briefs, articles, modeLabel) {
+  var today = new Date().toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' });
+  var magName = magSettings.magName || 'HYPOKEIMENON';
+  return [{
+    label: 'COVER',
+    role: 'COVER',
+    type: 'brief-cover',
+    title: '이주의 뉴스\n브리프',
+    body: today + ' 기준 · 선택 기사 ' + articles.length + '건\n' + (modeLabel || '기사별 1장 요약'),
+    magName: magName
+  }].concat(briefs);
+}
+
+async function generateBriefFromSelected() {
+  if (!checkLimit()) return;
+  var indexes = getSelectedArticleIndexes();
+  if (!indexes.length) { showToast('브리프로 만들 기사를 체크해 주세요.'); return; }
+  if (indexes.length > 4) { showToast('최대 4개까지만 선택할 수 있어요.'); return; }
+  currentOutputMode = 'brief';
+  var token = ++generationSeq;
+  $('cards-panel').style.display = 'block';
+  setStatus('warn', '선택 기사 본문을 수집하고 있어요. 기사끼리 내용을 섞지 않습니다.');
+  showLoading('선택 기사 본문 수집 중...');
+  try {
+    var articles = [];
+    for (var n = 0; n < indexes.length; n++) {
+      var original = currentArticles[indexes[n]];
+      var body = await fetchArticleBody(original);
+      articles.push(Object.assign({}, original, { body: body }));
+    }
+    if (token !== generationSeq) return;
+
+    var briefCards = [];
+    var statusMsg = '';
+    try {
+      showLoading('AI 브리프 생성 중...');
+      var data = await workerApiJson('/generate-article-briefs', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          query: lastQuery,
+          articles: articles.map(function(a) {
+            return { title: a.title, desc: a.desc, url: a.url, origin: a.origin, domain: a.domain, pubDate: a.pubDate, body: a.body };
+          }),
+          rules: {
+            factOnly: true,
+            noMixing: true,
+            maxArticles: 4,
+            format: 'article_one_card_each'
+          }
+        }),
+        timeout: 70000
+      });
+      briefCards = normalizeBriefCardsFromWorker(data.cards || data.briefs || [], articles);
+      statusMsg = clean((data.sourceInfo && data.sourceInfo.status) || 'AI 브리프 생성 완료 · 기사별 독립 요약');
+    } catch(workerError) {
+      // 새 Worker 엔드포인트가 아직 없을 때도 화면에서 바로 테스트할 수 있도록, 본문 문장만 추출해 안전한 브리프를 만든다.
+      briefCards = articles.map(function(a, i) {
+        var b = makeExtractiveBrief(a, a.body || a.desc || '');
+        return {
+          label: 'NEWS ' + String(i + 1).padStart(2, '0'),
+          role: 'ARTICLE BRIEF',
+          title: b.headline,
+          body: b.body,
+          sourceTitle: a.title,
+          sourceDomain: a.domain || '',
+          sourceDate: a.pubDate || '',
+          type: 'brief'
+        };
+      });
+      statusMsg = '전용 AI 브리프 Worker가 아직 연결되지 않아, 기사 본문 문장만 추출한 안전 요약으로 생성했어요.';
+    }
+
+    cards = makeBriefCards(briefCards, articles, '기사별 1장 요약');
+    lastSummary = {
+      caption: '이주의 뉴스 브리프 — 선택 기사 ' + articles.length + '건을 기사별로 요약했습니다.',
+      hashtags: ['#뉴스브리프', '#카드뉴스', '#이주의뉴스']
+    };
+    cardImages = {}; cardStyles = {}; cardAlign = {};
+    renderCards();
+    setStatus(statusMsg.indexOf('안전 요약') >= 0 ? 'warn' : 'ok', statusMsg);
+    setTimeout(function() { $('cards-panel').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
+    incrementUsage();
+    showToast('기사별 1장 브리프를 생성했어요.');
+  } catch(e) {
+    setStatus('warn', e.message || '브리프 생성 실패');
+    showToast(e.message || '브리프 생성 실패');
+  } finally {
+    hideLoading();
+  }
 }
 
 function getManualTextForArticle(article) {
@@ -581,21 +821,36 @@ function getManualTextForArticle(article) {
 }
 
 function styleOf(i) {
-  if (!cardStyles[i]) cardStyles[i] = { bg: i === 0 ? '#101010' : '#080808', title: '#ffffff', body: '#ffffff', accent: i === 0 ? '#ff9ec7' : '#ff9ec7', size: 18 };
-  // 팔레트 적용
-  var palette = magSettings.palette || 'peach';
-  var accentMap = { peach: '#f6bcba', lavender: '#a78bfa', mint: '#34d399', sky: '#38bdf8', sand: '#fbbf24', rose: '#fb7185', noir: '#9ca3af', cream: '#fef08a' };
-  if (!cardStyles[i]._paletteSet) {
-    cardStyles[i].accent = accentMap[palette] || '#f6bcba';
-    cardStyles[i]._paletteSet = true;
+  if (!cardStyles[i]) {
+    var c = cards[i] || {};
+    var isBrief = c.type === 'brief' || c.type === 'brief-cover';
+    cardStyles[i] = {
+      bg: '#090909',
+      title: '#ffffff',
+      body: '#ffffff',
+      accent: isBrief ? '#eff45b' : '#ff9ec7',
+      size: isBrief ? 22 : 18
+    };
+  }
+  // 팔레트 적용: 기존 카드뉴스 모드에만 은은하게 반영
+  var c0 = cards[i] || {};
+  if (c0.type !== 'brief' && c0.type !== 'brief-cover') {
+    var palette = magSettings.palette || 'peach';
+    var accentMap = { peach: '#f6bcba', lavender: '#a78bfa', mint: '#34d399', sky: '#38bdf8', sand: '#fbbf24', rose: '#fb7185', noir: '#9ca3af', cream: '#fef08a' };
+    if (!cardStyles[i]._paletteSet) {
+      cardStyles[i].accent = accentMap[palette] || '#f6bcba';
+      cardStyles[i]._paletteSet = true;
+    }
   }
   return cardStyles[i];
 }
+
 function alignOf(i) { if (!cardAlign[i]) cardAlign[i] = 'center'; return cardAlign[i]; }
 function setAlign(i, align) { cardAlign[i] = align; rerenderCard(i); }
 
 async function generateFromArticle(index) {
   if (!checkLimit()) return;
+  currentOutputMode = 'cardnews';
   var article = currentArticles[index];
   if (!article) { showToast('기사 정보를 찾지 못했어요.'); return; }
   var token = ++generationSeq;
@@ -693,6 +948,34 @@ function cardHtml(c, i) {
   var magName = magSettings.magName || 'MAGAZINIE';
   var magHandle = magSettings.magHandle || 'magazinie';
 
+  if (c.type === 'brief-cover') {
+    return '<div class="card-inner" style="background:' + st.bg + ';color:#fff;">'
+      + (img ? '<img src="' + img + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.22">' : defaultBg(i))
+      + '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.42),rgba(0,0,0,.95))"></div>'
+      + '<div style="position:absolute;right:18px;top:18px;font-size:11px;font-weight:900;letter-spacing:.08em;color:rgba(255,255,255,.82)">' + escapeHtml((c.magName || magName).toLowerCase()) + '</div>'
+      + '<div style="position:absolute;left:18px;top:74px;display:flex;gap:5px;flex-wrap:wrap"><span class="brief-mini-label">이</span><span class="brief-mini-label">주</span><span class="brief-mini-label">의</span><span class="brief-mini-label">뉴</span><span class="brief-mini-label">스</span></div>'
+      + '<div style="position:absolute;left:18px;right:18px;top:132px;font-size:' + Math.max(28, st.size + 8) + 'px;line-height:1.12;font-weight:950;letter-spacing:-.055em;white-space:pre-line;word-break:keep-all;color:' + st.title + '">' + escapeHtml(c.title || '') + '</div>'
+      + '<div style="position:absolute;left:18px;right:18px;bottom:22px;font-size:13px;line-height:1.55;font-weight:750;color:rgba(255,255,255,.76);white-space:pre-line;word-break:keep-all">' + escapeHtml(c.body || '') + '</div>'
+      + '</div>';
+  }
+
+  if (c.type === 'brief') {
+    var meta = [];
+    if (c.sourceDomain) meta.push(c.sourceDomain);
+    if (c.sourceDate) {
+      try { meta.push(new Date(c.sourceDate).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })); } catch(e) {}
+    }
+    return '<div class="card-inner" style="background:' + st.bg + ';color:#fff;">'
+      + (img ? '<img src="' + img + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18">' : defaultBg(i))
+      + '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.16),rgba(0,0,0,.94) 62%)"></div>'
+      + '<div style="position:absolute;right:18px;top:17px;font-size:11px;font-weight:900;letter-spacing:.08em;color:rgba(255,255,255,.82)">' + escapeHtml(magHandle.replace('@','').toLowerCase()) + '</div>'
+      + '<div style="position:absolute;left:18px;top:64px;display:flex;gap:5px;flex-wrap:wrap"><span class="brief-mini-label">이</span><span class="brief-mini-label">주</span><span class="brief-mini-label">의</span><span class="brief-mini-label">뉴</span><span class="brief-mini-label">스</span></div>'
+      + '<div style="position:absolute;left:18px;right:18px;top:108px;font-size:' + Math.max(23, st.size + 4) + 'px;line-height:1.18;font-weight:950;letter-spacing:-.055em;white-space:pre-line;word-break:keep-all;color:' + st.title + '">' + escapeHtml(c.title || '') + '</div>'
+      + '<div style="position:absolute;left:18px;right:18px;bottom:38px;font-size:' + Math.max(11, st.size - 9) + 'px;line-height:1.56;font-weight:800;color:' + st.body + ';white-space:pre-line;word-break:keep-all;letter-spacing:-.035em">' + escapeHtml(c.body || '') + '</div>'
+      + '<div style="position:absolute;left:18px;right:18px;bottom:16px;font-size:9px;line-height:1.35;font-weight:800;color:rgba(255,255,255,.48);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">출처 · ' + escapeHtml(meta.join(' · ') || clean(c.sourceTitle || '선택 기사')) + '</div>'
+      + '</div>';
+  }
+
   if (c.type === 'hook') {
     return '<div class="card-inner" style="background:' + st.bg + ';">'
       + (img ? '<img src="' + img + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">' : defaultBg(i))
@@ -727,7 +1010,7 @@ function renderEdit(c, i) {
   div.className = 'edit-panel';
   div.innerHTML = '<div class="edit-label">제목 수정</div>'
     + '<textarea id="title-' + i + '" class="title-input">' + escapeHtml(c.title || '') + '</textarea>'
-    + (c.type === 'body' ? '<div class="edit-label">본문 수정</div><textarea id="body-' + i + '" class="body-input">' + escapeHtml(c.body || '') + '</textarea>' : '')
+    + ((c.type === 'body' || c.type === 'brief' || c.type === 'brief-cover' || c.type === 'cta') ? '<div class="edit-label">본문 수정</div><textarea id="body-' + i + '" class="body-input">' + escapeHtml(c.body || '') + '</textarea>' : '')
     + '<div class="color-grid">'
     + '<label class="color-item">배경 <input type="color" value="' + st.bg + '" onchange="setStyle(' + i + ',\'bg\',this.value)"></label>'
     + '<label class="color-item">제목 <input type="color" value="' + st.title + '" onchange="setStyle(' + i + ',\'title\',this.value)"></label>'
@@ -757,8 +1040,15 @@ function setImage(i, input) {
 function renderCaption() {
   if (!cards.length) { $('caption-box').innerHTML = ''; $('hashtag-box').textContent = ''; return; }
   var lines = [];
-  lines.push('⭐ ' + clean(cards[0] && cards[0].title || ''));
-  cards.slice(1, 4).forEach(function(c) { lines.push('📍 ' + clean((c.role ? c.role + ' — ' : '') + (c.body || ''))); });
+  if (currentOutputMode === 'brief' || (cards[0] && cards[0].type === 'brief-cover')) {
+    lines.push('🗞️ ' + clean(cards[0] && cards[0].title || '이주의 뉴스 브리프').replace(/\n/g, ' '));
+    cards.filter(function(c) { return c.type === 'brief'; }).forEach(function(c, idx) {
+      lines.push('📌 ' + (idx + 1) + '. ' + clean((c.title || '').replace(/\n/g, ' ')) + ' — ' + clip(c.body || '', 120));
+    });
+  } else {
+    lines.push('⭐ ' + clean(cards[0] && cards[0].title || ''));
+    cards.slice(1, 4).forEach(function(c) { lines.push('📍 ' + clean((c.role ? c.role + ' — ' : '') + (c.body || ''))); });
+  }
   $('caption-box').innerHTML = lines.map(function(x) { return '<div class="caption-line">' + escapeHtml(x) + '</div>'; }).join('');
   $('hashtag-box').textContent = Array.isArray(lastSummary.hashtags) && lastSummary.hashtags.length
     ? lastSummary.hashtags.map(clean).join(' ')
@@ -799,6 +1089,7 @@ function init() {
   renderSearchChips();
   checkWorkerHealth(false);
   updateUsageUI();
+  updateSelectedCount();
   loadSharedCards();
   var usageEl = document.getElementById('usage-counter');
   if (usageEl) usageEl.addEventListener('click', toggleDevMode);
@@ -1007,6 +1298,7 @@ async function loadSharedCards() {
     if (!data || !data[0]) throw new Error('카드를 찾을 수 없어요.');
     var row = data[0];
     cards = row.cards || [];
+    currentOutputMode = cards.some(function(c) { return c.type === 'brief' || c.type === 'brief-cover'; }) ? 'brief' : 'cardnews';
     lastSummary = row.summary || {};
     cardImages = {}; cardStyles = {}; cardAlign = {};
     document.getElementById('cards-panel').style.display = 'block';
